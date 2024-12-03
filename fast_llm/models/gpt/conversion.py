@@ -343,12 +343,14 @@ class OLMoEHuggingfaceCheckpointHandler(CommonLlamaHuggingfaceCheckpointHandler)
     @classmethod
     def _create_config_converters(cls) -> list[ParamConverter]:
         return super()._create_config_converters() + [
-            ConstantExportParamConverter(None, "architectures", ["MixtralForCausalLM"]),
+            ConstantExportParamConverter(None, "architectures", ["OlmoeForCausalLM"]),
             ConstantImportParamConverter(("transformer", "expert_routing_type"), None, RoutingType.topk),
             ParamConverter(("transformer", "num_experts"), "num_experts"),
             ParamConverter(("transformer", "num_experts_per_token"), "num_experts_per_tok"),
-            IgnoreImportParamConverter(None, "sliding_window", None),
-
+            # TODO: change this once fast-llm supports normalized topk probs
+            ConstantExportParamConverter(None, "norm_topk_prob", True),
+            # TODO: change this once fast-llm supports qk normalization
+            ConstantExportParamConverter(None, "qk_norm", False)
         ]
 
     def _get_mlp_converters(self, fast_llm_prefix: str, hf_prefix: str):
